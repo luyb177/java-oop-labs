@@ -1,0 +1,469 @@
+实验 1 泛型与集合基础实验
+实现一个泛型类 GenericBox，包含 add 方法和 get 方法。使用 ArrayList 存储多个 GenericBox 实例，并通过迭代器遍历输出所有内容。
+
+实验 2 集合排序与多线程
+创建一个 Student 类，包含姓名和分数。使用 Collections.sort 和 Comparator 对 List<Student> 按分数排序。启动两个线程，线程 1 打印排序结果，线程 2 随机修改 3 个学生的分数并重新排序。
+
+实验 3 线程安全的集合操作
+使用 ConcurrentHashMap 模拟商品库存系统，商品 ID 作为键，库存量作为值。启动 10 个线程并发执行购买操作减少库存，确保线程安全，最后输出剩余库存。
+
+实验 4 生产者消费者模型
+使用 BlockingQueue 实现生产者消费者模型。生产者线程生成 1 到 100 的随机数放入队列，消费者线程取出并计算平方。要求队列容量为 10，使用泛型定义队列类型。
+
+实验 5 多线程数据统计
+给定一个大型 List<String> 模拟日志数据，启动 4 个线程分别统计总行数、包含 error 的行数、最长字符串长度、重复字符串次数。使用 Callable 和 Future 收集结果，主线程汇总输出。
+
+实验6  按身高排序
+程序模板  阅读下列模板并上机调试，完成实验后的练习。
+Student.java
+public class Student implements Comparable<Student> { 
+   int height=0;
+   String name;
+   Student(String n,int h) {
+      name=n;
+      height = h;
+     
+   }
+   public int compareTo(Student b) { // 两个Student对象相等当且仅当二者的height值相等
+     return (this.height-b.height);
+   }
+}
+FindStudent.java
+import java.util.*;
+public class FindStudent {
+    public static void main(String args[ ]) { 
+       List<Student> list = new LinkedList<Student>();
+       list.add(new Student("张三",188));
+       list.add(new Student("李四",178));
+       list.add(new Student("周五",198)); 
+       Iterator<Student> iter=list.iterator();
+       System.out.println("排序前,链表中的数据");
+       while(iter.hasNext()){
+          Student stu=iter.next();
+          System.out.println(stu.name+ "身高:"+stu.height);
+       }
+       Collections.sort(list);
+       System.out.println("排序后,链表中的数据");
+       iter=list.iterator();
+       while(iter.hasNext()){
+          Student stu=iter.next();
+          System.out.println(stu.name+ "身高:"+stu.height);
+       }
+       Student zhaoLin = new Student("zhao xiao lin",178);
+       int index = Collections.binarySearch(list,zhaoLin,null);
+       if(index>=0) {
+            System.out.println(zhaoLin.name+"和链表中"+list.get(index).name+"身高相同");
+       }
+    }
+} 
+
+实验7  电话簿
+程序模板 阅读下列模板并上机调试，完成实验后的练习。
+// WindowPhone.java 
+import java.awt.*;
+import javax.swing.*;
+public class WindowPhone extends JFrame {
+   JTextField inputText;
+   JButton enter;
+   JTextArea showText;
+   HandleQuery query;           //监视器
+   WindowPhone() {
+      setLayout(new FlowLayout());
+      inputText=new JTextField(10);
+      enter = new JButton("查询");
+      showText=new JTextArea(8,36);
+      add(new JLabel("姓名中包含:"));
+      add(inputText); 
+      add(enter);
+      add(new JScrollPane(showText));
+      query=new HandleQuery();
+      query.setView(this);
+      enter.addActionListener(query);
+      inputText.addActionListener(query);
+      setBounds(100,100,460,380);
+      setVisible(true);
+      setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+   }
+   public static void main(String args[]) {
+      WindowPhone win=new WindowPhone();
+      win.setTitle("电话簿");
+   }
+}
+// HandleQuery.java 
+import java.awt.event.*;   
+import java.util.*;
+import java.io.File;
+public class HandleQuery implements ActionListener {
+    WindowPhone view;
+    HashMap<String,String> hashtable;
+    File file=new File("phone.txt");
+    Scanner sc=null;
+    HandleQuery() {
+        hashtable=new HashMap<String,String>();
+        try{  sc=new Scanner(file);
+              sc.useDelimiter("[#]+");
+              while(sc.hasNext()){
+                 String name=sc.next();
+                 String phoneMess=sc.next(); 
+                 hashtable.put(name,phoneMess);
+              } 
+        }
+        catch(Exception e){}  
+   }
+   public void setView(WindowPhone view) {
+      this.view=view;
+   }
+   public void actionPerformed(ActionEvent e) {
+      String name=view.inputText.getText().trim();
+      Set<String> keySet = hashtable.keySet(); //得到hashtable中的全部Key
+      Iterator<String> iter = keySet.iterator();
+      while(iter.hasNext()) {
+           String nameKey = iter.next();
+           if(nameKey.contains(name)){
+               String phoneMess=hashtable.get(nameKey);
+               view.showText.append(nameKey+":\n"+phoneMess+"\n");
+           }
+      }  
+   }
+}
+
+实验8  演出节目单
+程序模板  认真阅读、调试模板程序，完成实验后的练习。
+//Perform.java   
+public class Perform {  //主类
+   public static void main(String args[]){
+      new ShowFrame();
+   }
+}
+//Program.java 
+import java.time.LocalDateTime;
+public class Program implements Comparable<Program> { 
+   LocalDateTime time=null;
+   String name;
+   Program(String name,LocalDateTime time) {
+      this.name = name; 
+      this.time = time;
+   }
+   public int compareTo(Program b) { // 确定Program对象之间的大小关系
+      return time.compareTo(b.getLocalDateTime()); 
+   }
+   public String getName() {
+      return name;
+   }
+   public LocalDateTime getLocalDateTime() {
+       return time;
+   }
+}
+//ShowFrame.java 
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import javax.swing.*;
+import java.time.LocalDateTime;
+public class ShowFrame extends JFrame implements ActionListener {
+    JTextArea showArea;
+    JTextField inputName,inputTime;
+    JButton button;
+    TreeSet<Program> treeSet;
+    ShowFrame() {
+       treeSet= new TreeSet<Program>();
+       showArea=new JTextArea();
+       showArea.setFont(new Font("",Font.BOLD,20));
+       inputName=new JTextField(12);
+       inputTime=new JTextField(20);
+       button=new JButton("确定");
+       button.addActionListener(this);
+       JPanel pNorth=new JPanel();
+       pNorth.add(new JLabel("节目名称:"));
+       pNorth.add(inputName);
+       pNorth.add(new JLabel("时间(年-月-日/时:分:秒)"));
+       pNorth.add(inputTime);
+       pNorth.add(button);
+       add(pNorth,BorderLayout.NORTH);
+       add(new JScrollPane(showArea),BorderLayout.CENTER);
+       setSize(620,320);
+       setVisible(true);
+       setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+       validate();
+    } 
+    public void actionPerformed(ActionEvent e) {
+       String name=inputName.getText();
+       String timeStr=inputTime.getText();
+       StringTokenizer jiexi = new StringTokenizer(timeStr,"-/: ");
+       int year=Integer.parseInt(jiexi.nextToken());  
+       int month=Integer.parseInt(jiexi.nextToken());
+       int day=Integer.parseInt(jiexi.nextToken());  
+       int hour=Integer.parseInt(jiexi.nextToken());
+       int minute=Integer.parseInt(jiexi.nextToken());
+       int second=Integer.parseInt(jiexi.nextToken());
+       LocalDateTime time = LocalDateTime.of(year,month,day,hour,minute,second);
+       Program program = new Program(name,time);  
+       treeSet.add(program); 
+       show(treeSet);
+    }
+    public void show(TreeSet tree) {
+       showArea.setText(null);
+       Iterator<Program> te= treeSet.iterator();
+       while(te.hasNext())  {    
+          Program pro= te.next();
+          String pattern = "%tY-%<tm-%<td/%<tT";
+          String strTime = String.format(pattern,pro.getLocalDateTime());
+          showArea.append(pro.getName()+"(演出时间):\n"+strTime+"\n");
+       }
+    }
+}
+ 
+
+
+
+实验9  汉字输入练习
+程序模板 请按模板要求，将【代码】替换为Java程序代码。
+TypeChinese.java
+public class TypeChinese {
+  public static void main(String args[]) {
+      System.out.println("输入汉字练习(输入#结束程序)");
+      System.out.printf("输入显示的汉字(回车)\n");
+      Chinese hanzi;
+      hanzi = new Chinese();
+      GiveChineseThread giveHanzi;
+      InputChineseThread typeHanzi;
+      【代码1】创建线程giveHanzi
+      giveHanzi.setChinese(hanzi);
+      giveHanzi.setSleepLength(6000);
+      【代码2】创建线程typeHanzi
+      typeHanzi.setChinese(hanzi);
+      giveHanzi.start();
+      try{
+         Thread.sleep(200);
+      }
+      catch(Exception exp){} 
+      typeHanzi.start();
+   }
+}
+Chinese.java
+public class Chinese {
+   char c ='\0';
+   public void setChinese(char c) {
+      this.c = c;
+   }
+   public char getChinese() {
+      return c;
+   }
+}
+GiveChineseThread.java
+public class GiveChineseThread extends Thread {
+    Chinese hanzi;
+    char startChar =(char)22909,endChar = (char)(startChar+100);
+    int sleepLength = 5000;
+    public void setChinese(Chinese hanzi) {
+      this.hanzi = hanzi;
+    }
+    public void setSleepLength(int n){
+       sleepLength = n;
+    } 
+    public void run() {
+       char c = startChar;
+       while(true) {
+          hanzi.setChinese(c);
+          System.out.printf("显示的汉字:%c\n ",hanzi.getChinese());
+          try{  【代码3】//调用sleep方法使得线程中断sleepLength豪秒
+          }
+          catch(InterruptedException e){}
+          c = (char)(c+1);
+          if(c>endChar)  
+             c = startChar;
+        }
+    } 
+}
+InuptChineseThread.java
+import java.util.Scanner;
+public class InputChineseThread extends Thread {
+   Scanner reader;
+   Chinese hanzi;
+   int score = 0;
+   InputChineseThread() {
+      reader = new Scanner(System.in);
+   }
+   public void setChinese(Chinese hanzi) {
+      this.hanzi = hanzi;
+   }
+   public void run() {
+      while(true) {
+        String str = reader.nextLine();
+        char c = str.charAt(0); 
+        if(c==hanzi.getChinese()) {
+           score++;
+           System.out.printf("\t\t输入对了,目前分数%d\n",score);
+        }
+        else {
+          System.out.printf("\t\t输入错了,目前分数%d\n",score); 
+        }
+        if(c=='#')
+           System.exit(0);
+      }
+   }
+}
+
+实验10  双线程猜数字
+程序模板 请按模板要求，将【代码】替换为Java程序代码。
+TwoThreadGuessNumber.java
+public class TwoThreadGuessNumber {
+   public static void main(String args[]) {
+      Number number=new Number();
+      number.giveNumberThread.start();
+      number.guessNumberThread.start();
+   }
+}
+Number.java
+public class Number implements Runnable {
+   final int SMALLER=-1,LARGER=1,SUCCESS=8;
+   int realNumber,guessNumber,min=0,max=100,message=SMALLER;
+   boolean pleaseGuess=false,isGiveNumber=false;
+   Thread giveNumberThread,guessNumberThread;
+   Number() {
+   【代码1】创建giveNumberThread,当前Number类的实例是giveNumberThread的目标对象
+   【代码2】创建guessNumberThread,当前Number类的实例是guessNumberThread的目标对象
+   }
+   public void run() {
+      for(int count=1;true;count++) {
+         setMessage(count);
+         if( message==SUCCESS)
+            return;
+      }
+   }
+   public synchronized void setMessage(int count) {
+      if(Thread.currentThread()==giveNumberThread&&isGiveNumber==false) {
+          realNumber=(int)(Math.random()*100)+1;
+          System.out.println("随机给你一个1至100之间的数，猜猜是多少？");
+          isGiveNumber=true;
+          pleaseGuess=true;
+      }
+      if(Thread.currentThread()==giveNumberThread) {
+          while(pleaseGuess==true)             
+             try  { wait();  //让出CPU使用权，让另一个线程开始猜数
+             }
+             catch(InterruptedException e){}
+             if(realNumber>guessNumber)  { //结束等待后，根据另一个线程的猜测给出提示
+                message=SMALLER;
+                System.out.println("你猜小了");
+             }
+             else if(realNumber<guessNumber) {
+                message=LARGER;
+                System.out.println("你猜大了");
+             } 
+             else {
+                message=SUCCESS;
+                System.out.println("恭喜，你猜对了");
+             }  
+             pleaseGuess=true;
+          }
+      if(Thread.currentThread()==guessNumberThread&&isGiveNumber==true) {
+             while(pleaseGuess==false)
+                try { wait();  //让出CPU使用权，让另一个线程给出提示
+                }
+                catch(InterruptedException e){}
+                if(message==SMALLER) {
+                   min=guessNumber;
+                   guessNumber=(min+max)/2; 
+                   System.out.println("我第"+count+"次猜这个数是:"+guessNumber);
+                }
+                else if(message==LARGER) {
+                   max=guessNumber;
+                   guessNumber=(min+max)/2; 
+                   System.out.println("我第"+count+"次猜这个数是:"+guessNumber);
+                }
+                pleaseGuess=false; 
+      }
+      notifyAll();
+   }
+}
+
+实验11  月亮围绕地球
+程序模板  请按模板要求，将【代码】替换为Java程序代码。
+MainClass.java
+import javax.swing.*;
+public class MainClass {
+      public static void main(String args[]) {
+      Sky sky= new Sky();
+      JFrame frame = new JFrame();
+      frame.add(sky);
+      frame.setSize(500,500);
+      frame.setVisible(true);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.getContentPane().setBackground(java.awt.Color.white);
+    }
+}
+Earth.java
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+public class Earth extends JLabel implements ActionListener {
+   JLabel moon;  //显示月亮之外观 
+   Timer timer;
+   double pointX[]=new double[360], 
+          pointY[]=new double[360]; 
+   int w=200,h=200,i=0;
+   Earth() {
+     setLayout(new FlowLayout());
+     setPreferredSize(new Dimension(w,h));
+     【代码1 】 //创建timer,振铃间隔是20毫秒当前Earth对象为其监视器     
+     setIcon(new ImageIcon("earth.jpg"));
+     setHorizontalAlignment(SwingConstants.CENTER);
+     moon=new JLabel(new ImageIcon("moon.jpg"),SwingConstants.CENTER);
+     add(moon);
+     moon.setPreferredSize(new Dimension(60,60));
+     pointX[0]=0;                
+     pointY[0]=h/2;
+     double angle=1*Math.PI/180;   //刻度为1度  
+     for(int i=0;i<359;i++) {      //计算出数组中各个元素的值 
+       pointX[i+1]=pointX[i]*Math.cos(angle)-Math.sin(angle)*pointY[i];
+       pointY[i+1]=pointY[i]*Math.cos(angle)+pointX[i]*Math.sin(angle);
+     }
+     for(int i=0;i<360;i++) {            
+       pointX[i]=0.8*pointX[i]+w/2;    //坐标缩放、平移     
+       pointY[i]=0.8*pointY[i]+h/2;
+     }
+     timer.start();
+   }
+   public void actionPerformed(ActionEvent e) {
+       i=(i+1)%360;
+       moon.setLocation((int)pointX[i]-30,(int)pointY[i]-30);
+   }
+}
+Sky.java
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+public class Sky extends JLabel implements ActionListener {
+   Earth earth;
+   Timer timer;
+   double pointX[]=new double[360], 
+          pointY[]=new double[360]; 
+   int w=400,h=400,i=0;
+   Sky() {
+     setLayout(new FlowLayout());
+      【代码2】//创建timer,振铃间隔是100毫秒当前Sky对象为其监视器
+     setPreferredSize(new Dimension(w,h));
+     earth = new Earth();
+     add(earth);
+     earth.setPreferredSize(new Dimension(200,200));
+     pointX[0]=0;                
+     pointY[0]=h/2;
+     double angle=1*Math.PI/180;   //刻度为1度  
+     for(int i=0;i<359;i++) {      //计算出数组中各个元素的值 
+       pointX[i+1]=pointX[i]*Math.cos(angle)-Math.sin(angle)*pointY[i];
+       pointY[i+1]=pointY[i]*Math.cos(angle)+pointX[i]*Math.sin(angle);
+     }
+     for(int i=0;i<360;i++) {            
+       pointX[i]=0.5*pointX[i]+w/2;    //坐标缩放、平移
+       pointY[i]=0.5*pointY[i]+h/2;
+     }
+     timer.start();
+   }
+   public void actionPerformed(ActionEvent e) {
+       i=(i+1)%360;
+       earth.setLocation((int)pointX[i]-100,(int)pointY[i]-100);
+   }
+}
+
+ 
